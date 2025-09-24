@@ -1,0 +1,5 @@
+{
+  "name": "Puter AI Chat",
+  "description": "A minimalist, animated chatbot interface using the Puter.js SDK. It features chat history, a model selector, and a fluid, streaming user experience.",
+  "requestFramePermissions": []
+}
