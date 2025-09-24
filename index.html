@@ -1,11 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Puter AI Chat</title>
+    <title>PiChat</title>
+    <script src="https://kit.fontawesome.com/aa338543cb.js" crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://js.puter.com/v2/"></script>
     <script>
@@ -14,17 +14,101 @@
           extend: {
             colors: {
               'puter-blue': '#3b82f6',
-              'puter-gray-900': '#111827',
-              'puter-gray-800': '#1f2937',
-              'puter-gray-700': '#374151',
-              'puter-gray-600': '#4b5563',
-              'puter-gray-400': '#9ca3af',
-              'puter-gray-300': '#d1d5db',
+              'theme-bg': '#f3f4f6',
+              'theme-text': '#1f2937',
+              'theme-text-secondary': '#4b5563',
+              'theme-border': 'rgba(255, 255, 255, 0.5)',
+              'theme-surface': 'rgba(255, 255, 255, 0.6)',
+              'theme-surface-hover': 'rgba(255, 255, 255, 0.8)',
+            },
+            borderRadius: {
+              '4xl': '2rem',
+            },
+            animation: {
+                gradient: 'gradient 2s ease infinite',
+                'blur-in': 'blur-in 0.4s ease-out forwards',
+                'word-fade-in': 'word-fade-in 0.3s ease-out forwards',
+            },
+            keyframes: {
+                gradient: {
+                    '0%, 100%': { backgroundPosition: '0% 50%' },
+                    '50%': { backgroundPosition: '100% 50%' },
+                },
+                'blur-in': {
+                    'from': { opacity: '0', filter: 'blur(8px)', transform: 'translateY(10px) scale(0.95)' },
+                    'to': { opacity: '1', filter: 'blur(0)', transform: 'translateY(0) scale(1)' },
+                },
+                'word-fade-in': {
+                  'from': { opacity: '0', transform: 'translateY(3px)' },
+                  'to': { opacity: '1', transform: 'translateY(0)' },
+                }
             }
           }
         }
       }
     </script>
+    <style>
+      body::before, body::after {
+        content: '';
+        position: fixed;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        filter: blur(150px);
+        z-index: -1;
+        animation: drift 20s infinite linear alternate;
+      }
+      body::before {
+        background: rgba(59, 130, 246, 0.2);
+        top: 10%;
+        left: 15%;
+      }
+      body::after {
+        background: rgba(139, 92, 246, 0.15);
+        bottom: 10%;
+        right: 15%;
+        animation-delay: -10s;
+      }
+      @keyframes drift {
+        0% {
+          transform: translate(0, 0) rotate(0deg);
+        }
+        100% {
+          transform: translate(100px, 50px) rotate(30deg);
+        }
+      }
+      .streaming-text-chunk {
+        display: inline-block;
+        opacity: 0;
+        animation: word-fade-in 0.3s forwards;
+      }
+      .message-appear {
+        animation: message-fade-in 0.5s ease-out forwards;
+      }
+      @keyframes message-fade-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .voice-chat-bg {
+        background: linear-gradient(180deg, #ffffff 80%, #e0f7ff 100%);
+        background-size: 100% 200%;
+        animation: wave-idle 10s ease-in-out infinite alternate;
+      }
+      .voice-chat-bg.listening {
+        background: linear-gradient(45deg, #89f7fe, #66a6ff, #a1c4fd, #c2e9fb);
+        background-size: 400% 400%;
+        animation: wave-listening 4s ease infinite;
+      }
+      @keyframes wave-idle {
+          from { background-position: 0% 100%; }
+          to { background-position: 0% 80%; }
+      }
+      @keyframes wave-listening {
+          0%{background-position:0% 50%}
+          50%{background-position:100% 50%}
+          100%{background-position:0% 50%}
+      }
+    </style>
   <script type="importmap">
 {
   "imports": {
@@ -35,7 +119,7 @@
 }
 </script>
 </head>
-  <body class="bg-puter-gray-900 text-puter-gray-300 antialiased">
+  <body class="bg-theme-bg text-theme-text antialiased overflow-hidden font-sans">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
