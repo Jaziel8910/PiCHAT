@@ -61,7 +61,9 @@ export const VoiceChat: React.FC<VoiceChatProps> = ({ isOpen, onClose }) => {
   }, [isMuted, status]);
 
   const handleSendToAI = useCallback(async (text: string) => {
-    const newHistory = [...history, { role: 'user', content: text }];
+    // FIX: Explicitly type `newHistory` to prevent TypeScript from widening the `role` property to `string`.
+    // This resolves downstream type errors when calling `setHistory` and `streamChatResponse`.
+    const newHistory: {role: 'user' | 'assistant', content: string}[] = [...history, { role: 'user', content: text }];
     setHistory(newHistory);
     setStatus('speaking');
 

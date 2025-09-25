@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Conversation } from '../types';
-import { PlusIcon, MessageIcon, TrashIcon, EditIcon, SearchIcon, XIcon, BrainIcon, CodeIcon, QuillIcon, SarcasticIcon, SidebarIcon, CogIcon } from './Icons';
+import { PlusIcon, MessageIcon, TrashIcon, EditIcon, SearchIcon, XIcon, BrainIcon, CodeIcon, QuillIcon, SarcasticIcon, SidebarIcon, CogIcon, MemoryIcon, SignOutIcon, UserIcon } from './Icons';
 
 interface HistorySidebarProps {
   conversations: Conversation[];
@@ -12,6 +12,10 @@ interface HistorySidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
   onOpenSettings: () => void;
+  onOpenMemory: () => void;
+  isFullScreen: boolean;
+  user: { username: string; avatar: string; } | null;
+  onSignOut: () => void;
 }
 
 const personaIcons: { [key: string]: React.FC<React.HTMLProps<HTMLElement>> } = {
@@ -32,6 +36,10 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
   isCollapsed,
   onToggle,
   onOpenSettings,
+  onOpenMemory,
+  isFullScreen,
+  user,
+  onSignOut,
 }) => {
   const [editingConvId, setEditingConvId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
@@ -65,6 +73,8 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
   const filteredConversations = conversations.filter(conv =>
     conv.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (isFullScreen) return null;
 
   return (
     <aside className={`bg-theme-surface backdrop-blur-2xl flex flex-col p-4 border border-theme-border rounded-4xl transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-64'}`}>
@@ -179,6 +189,21 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
         )}
       </nav>
       <div className="mt-auto pt-4 border-t border-theme-border">
+         {!isCollapsed && user && (
+            <div className="flex items-center gap-3 p-2 mb-2">
+                <div className="w-9 h-9 rounded-full bg-black/5 flex items-center justify-center">
+                    <UserIcon className="w-5 h-5 text-theme-text-secondary" />
+                </div>
+                <p className="flex-1 text-sm font-semibold text-theme-text truncate">{user.username}</p>
+                <button onClick={onSignOut} title="Sign Out" className="p-2 text-theme-text-secondary hover:text-red-500 rounded-full hover:bg-red-500/10 transition-colors">
+                    <SignOutIcon className="w-5 h-5" />
+                </button>
+            </div>
+        )}
+         <button onClick={onOpenMemory} className={`flex items-center w-full gap-3 p-2 rounded-2xl hover:bg-black/5 transition-colors ${isCollapsed ? 'justify-center' : ''}`}>
+            <MemoryIcon className="w-5 h-5 text-theme-text-secondary" />
+            {!isCollapsed && <span className="text-sm font-medium text-theme-text">Memory</span>}
+        </button>
         <button onClick={onOpenSettings} className={`flex items-center w-full gap-3 p-2 rounded-2xl hover:bg-black/5 transition-colors ${isCollapsed ? 'justify-center' : ''}`}>
             <CogIcon className="w-5 h-5 text-theme-text-secondary" />
             {!isCollapsed && <span className="text-sm font-medium text-theme-text">Settings</span>}

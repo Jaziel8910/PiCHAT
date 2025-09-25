@@ -1,27 +1,29 @@
+
+
 import { MODEL_IDS } from './models';
 import * as Icons from './components/Icons';
 
-export type MessageRole = 'user' | 'assistant';
+export type MessageRole = 'user' | 'assistant' | 'tool';
 export type IconName = keyof typeof Icons;
 
 export interface Message {
   id: string;
   role: MessageRole;
-  content: string; // The text part of the message
+  content: string; 
   attachments?: {
     puter_path: string;
-    preview_url: string; // For rendering in the UI before it's sent
+    preview_url: string; 
   }[];
-  imageUrl?: string; // For image generation
-  isGenerating?: boolean; // For image generation loading state
-  isStreaming?: boolean; // For text streaming state
-  thinkingContent?: string; // For model's thought process
-  isCurrentlyThinking?: boolean; // To know if the model is in a think block
+  imageUrl?: string; 
+  isGenerating?: boolean; 
+  isStreaming?: boolean; 
+  thinkingContent?: string; 
+  isCurrentlyThinking?: boolean; 
 }
 
 export type PuterModel = string;
 
-export type ImageGenerationModel = 'gpt-image-1' | 'dall-e-3' | 'gemini-2.5-flash-image-preview';
+export type ImageGenerationModel = 'gpt-image-1' | 'openrouter:google/gemini-2.5-flash-image-preview';
 
 export interface GenerateImageOptions {
   prompt: string;
@@ -47,77 +49,106 @@ export interface ModelInfo {
   isSupported?: boolean;
   category: ModelCategory;
   tags: string[];
+  speed?: number;
+  intelligence?: number;
 }
 
+export const AUTO_ROUTER_SYSTEM_PROMPT = `You are an expert AI model routing expert. Your only task is to analyze the user's prompt and determine the best-suited AI model from the provided list. Respond with ONLY the model ID string and nothing else. Do not add explanations, greetings, or any other text.
+
+Here is the list of available models and their strengths:
+
+### Category: Quick & General Chat / Simple Questions
+For fast, conversational responses, summarization, and simple questions.
+- openrouter:openai/gpt-4o-mini: Fast, capable, and affordable. Good default for general chat.
+- openrouter:google/gemini-2.5-flash: Extremely fast and cost-effective for high-throughput tasks.
+- openrouter:mistralai/mistral-7b-instruct: Very fast, open-source model, great for simple instructions.
+- openrouter:x-ai/grok-4-fast:free: A free, high-speed version of Grok, perfect for real-time conversation.
+- openrouter:anthropic/claude-3-haiku-20240307: Anthropic's fastest model, good for quick and accurate responses.
+
+### Category: Creative Writing & Brainstorming
+For stories, marketing copy, imaginative ideas, and text generation.
+- openrouter:openai/gpt-4o: Top-tier creativity, nuance, and writing ability. The best choice for high-quality creative tasks.
+- openrouter:anthropic/claude-3.5-sonnet-20240620: Excellent for nuanced writing, character development, and long-form content.
+- openrouter:mistralai/mistral-large: Strong multilingual and creative writing capabilities.
+- openrouter:x-ai/grok-4: Can generate creative text with a unique, sometimes humorous, personality.
+
+### Category: Deep Reasoning & Complex Problem Solving
+For analysis, math, logic, multi-step problems, and advanced instruction following.
+- openrouter:anthropic/claude-3-opus-20240229: Anthropic's most powerful model, excels at complex analysis and long-context reasoning.
+- openrouter:google/gemini-2.5-pro: Google's flagship, great for multimodal reasoning and handling vast amounts of information.
+- openrouter:meta-llama/llama-3.1-405b-instruct: Meta's largest model, for deep, complex reasoning.
+- openrouter:x-ai/grok-4: A frontier model with powerful reasoning capabilities.
+
+### Category: Basic Coding & Scripting
+For simple scripts, boilerplate, debugging small issues, and code explanations.
+- openrouter:openai/gpt-4o-mini: Capable of handling simple coding tasks quickly.
+- openrouter:google/gemini-2.5-flash: Fast enough for real-time code completion and simple script generation.
+- openrouter:mistralai/codestral-latest: Mistral's specialized code model, very fast and accurate for its size.
+- Qwen/Qwen2.5-Coder-32B-Instruct: A strong, dedicated coding model.
+
+### Category: Advanced Coding & Software Architecture
+For complex algorithms, new projects, architectural design, and challenging debugging.
+- openrouter:anthropic/claude-3.5-sonnet-20240620: Can reason about large codebases and complex architectures effectively. Excellent for coding tasks.
+- openrouter:google/gemini-2.5-pro: Excellent at understanding and generating code within large contexts.
+- openrouter:meta-llama/llama-3.1-405b-instruct: Its massive size allows it to grasp complex programming logic.
+- openrouter:deepseek/deepseek-coder: A highly capable model specialized in code generation and understanding.
+
+### Category: Image Analysis (Multimodal)
+For prompts that include images that need to be understood or analyzed.
+- openrouter:openai/gpt-4o: State-of-the-art vision understanding.
+- openrouter:anthropic/claude-3.5-sonnet-20240620: Excellent at interpreting charts, graphs, and complex images.
+- openrouter:google/gemini-2.5-pro: Top-tier vision capabilities, especially with dense information.
+- Qwen/Qwen2.5-VL-72B-Instruct: A powerful open-source vision-language model.
+
+Based on the user's prompt, choose the most appropriate model ID from the list above and return ONLY the ID.
+`;
+
 const MODEL_METADATA: Record<string, Partial<Omit<ModelInfo, 'id' | 'provider' | 'isFree' | 'providerIcon'>>> = {
-    // Hypothetical / Unsupported
-    'gpt-5': { name: 'GPT-5 (Hypothetical)', isSupported: false, description: 'This model is hypothetical and not yet available.' },
-    'gpt-5-mini': { name: 'GPT-5 Mini (Hypothetical)', isSupported: false, description: 'This model is hypothetical and not yet available.' },
-    'gpt-5-nano': { name: 'GPT-5 Nano (Hypothetical)', isSupported: false, description: 'This model is hypothetical and not yet available.' },
-    'gpt-5-chat-latest': { name: 'GPT-5 Chat (Hypothetical)', isSupported: false, description: 'This model is hypothetical and not yet available.' },
-    'gpt-5-2025-08-07': { name: 'GPT-5 (Hypothetical)', isSupported: false, description: 'This model is hypothetical and not yet available.' },
-    'gpt-5-mini-2025-08-07': { name: 'GPT-5 Mini (Hypothetical)', isSupported: false, description: 'This model is hypothetical and not yet available.' },
-    'gpt-5-nano-2025-08-07': { name: 'GPT-5 Nano (Hypothetical)', isSupported: false, description: 'This model is hypothetical and not yet available.' },
-    'o1': { name: 'O1', isSupported: false, description: 'This model is currently not supported by the chat API.' },
-    'o1-mini': { name: 'O1-Mini', isSupported: false, description: 'This model is currently not supported by the chat API.' },
-    'o1-pro': { name: "O1-Pro", description: "OpenAI's new flagship model for advanced reasoning, instruction following, and complex problem-solving. NOTE: Currently not supported by the chat API.", isRecommended: true, contextLength: 256000, category: 'deep-thought', tags: ['reasoning', 'powerful', 'openai'], isSupported: false },
-    'o3': { name: 'O3', isSupported: false, description: 'This model is currently not supported by the chat API.' },
-    'o3-mini': { name: 'O3-Mini', isSupported: false, description: 'This model is currently not supported by the chat API.' },
-    'o4-mini': { name: 'O4-Mini', isSupported: false, description: 'This model is currently not supported by the chat API.' },
-    'openrouter:openai/o1': { name: 'O1', isSupported: false, description: 'This model is currently not supported by the chat API.' },
-    'openrouter:openai/o1-mini': { name: 'O1-Mini', isSupported: false, description: 'This model is currently not supported by the chat API.' },
-    'openrouter:openai/o1-pro': { name: 'O1-Pro', isSupported: false, description: 'This model is currently not supported by the chat API.' },
-    'openrouter:openai/o3': { name: 'O3', isSupported: false, description: 'This model is currently not supported by the chat API.' },
-    'openrouter:openai/o3-mini': { name: 'O3-Mini', isSupported: false, description: 'This model is currently not supported by the chat API.' },
-    'openrouter:openai/o3-pro': { name: 'O3-Pro', isSupported: false, description: 'This model is currently not supported by the chat API.' },
-    'openrouter:openai/o4-mini': { name: 'O4-Mini', isSupported: false, description: 'This model is currently not supported by the chat API.' },
-    'gpt-4.5-preview': { name: 'GPT-4.5 Preview (Unsupported)', isSupported: false, description: 'This model is currently not supported by the chat API.' },
-
-    // Recommended & Popular
-    'gpt-4o': { name: "GPT-4o", description: "OpenAI's flagship multimodal model, balancing speed, intelligence, and vision capabilities.", isRecommended: true, contextLength: 128000, category: 'multimodal', tags: ['vision', 'fast', 'powerful', 'openai'] },
-    'claude-opus-4-1': { name: "Claude 4.1 Opus", description: "Anthropic's most powerful model for complex analysis, long documents, and demanding tasks.", isRecommended: true, contextLength: 200000, category: 'deep-thought', tags: ['vision', 'writing', 'analysis', 'anthropic', 'reasoning'] },
-    'openrouter:google/gemini-2.5-pro': { name: "Gemini 2.5 Pro", description: "Google's next-generation model for large-scale multimodal reasoning and long context understanding.", isRecommended: true, contextLength: 1000000, category: 'multimodal', tags: ['vision', 'long context', 'google'] },
-    'claude-3-5-sonnet-20240620': { name: "Claude 3.5 Sonnet", description: "Anthropic's fastest and most balanced model, ideal for enterprise workloads and most everyday tasks.", isRecommended: true, contextLength: 200000, category: 'multimodal', tags: ['vision', 'fast', 'balanced', 'anthropic'] },
-    'mistral-large-latest': { name: "Mistral Large", description: "Mistral's top-tier model, excellent for complex multilingual tasks and reasoning.", contextLength: 32000, category: 'text', tags: ['multilingual', 'reasoning', 'mistral'], isRecommended: true },
-    'openrouter:x-ai/grok-4': { name: 'Grok 4', description: "xAI's latest frontier model, offering powerful reasoning and efficiency for a wide range of complex tasks.", isRecommended: true, contextLength: 128000, category: 'deep-thought', tags: ['reasoning', 'powerful', 'grok'] },
-    'openrouter:x-ai/grok-4-fast:free': { name: 'Grok 4 Fast (Free)', description: "A free, high-speed version of xAI's powerful Grok 4 model, perfect for real-time conversation.", isRecommended: true, category: 'text', tags: ['fast', 'reasoning', 'grok', 'free'] },
+    // Auto Router
+    'openrouter/auto': { 
+        name: "Auto (Model Router)", 
+        description: "Automatically selects the best model for your prompt from a curated list of top performers. Powered by Llama 3.2 1B.", 
+        isRecommended: true, 
+        category: 'specialized', 
+        tags: ['router', 'smart', 'best choice'],
+        speed: 5, 
+        intelligence: 5,
+    },
     
-    // Deep Thought
-    'meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo': { name: 'Llama 3.1 405B Instruct', description: 'Meta\'s largest and most capable model for deep, complex reasoning and generation.', category: 'deep-thought', tags: ['reasoning', 'powerful', 'meta', 'llama'], contextLength: 128000, isRecommended: true },
-
+    // Recommended & Popular
+    'openrouter:openai/gpt-4o': { name: "GPT-4o", description: "OpenAI's flagship multimodal model, balancing speed, intelligence, and vision capabilities.", isRecommended: true, contextLength: 128000, category: 'multimodal', tags: ['vision', 'fast', 'powerful', 'openai'], speed: 4, intelligence: 5 },
+    'openrouter:anthropic/claude-3-opus-20240229': { name: "Claude 3 Opus", description: "Anthropic's most powerful model for complex analysis, long documents, and demanding tasks.", isRecommended: true, contextLength: 200000, category: 'deep-thought', tags: ['vision', 'writing', 'analysis', 'anthropic', 'reasoning'], speed: 3, intelligence: 5 },
+    'openrouter:google/gemini-2.5-pro': { name: "Gemini 2.5 Pro", description: "Google's next-generation model for large-scale multimodal reasoning and long context understanding.", isRecommended: true, contextLength: 1000000, category: 'multimodal', tags: ['vision', 'long context', 'google'], speed: 4, intelligence: 5 },
+    'openrouter:anthropic/claude-3.5-sonnet-20240620': { name: "Claude 3.5 Sonnet", description: "Anthropic's fastest and most balanced model, ideal for enterprise workloads and most everyday tasks.", isRecommended: true, contextLength: 200000, category: 'multimodal', tags: ['vision', 'fast', 'balanced', 'anthropic'], speed: 5, intelligence: 4 },
+    'openrouter:mistralai/mistral-large': { name: "Mistral Large", description: "Mistral's top-tier model, excellent for complex multilingual tasks and reasoning.", contextLength: 32000, category: 'text', tags: ['multilingual', 'reasoning', 'mistral'], isRecommended: true, speed: 4, intelligence: 4 },
+    'openrouter:x-ai/grok-4': { name: 'Grok 4', description: "xAI's latest frontier model, offering powerful reasoning and efficiency for a wide range of complex tasks.", isRecommended: true, contextLength: 128000, category: 'deep-thought', tags: ['reasoning', 'powerful', 'grok'], speed: 3, intelligence: 5 },
+    'openrouter:x-ai/grok-4-fast:free': { name: 'Grok 4 Fast (Free)', description: "A free, high-speed version of xAI's powerful Grok 4 model, perfect for real-time conversation.", isRecommended: true, category: 'text', tags: ['fast', 'reasoning', 'grok', 'free'], speed: 5, intelligence: 3 },
+    'openrouter:meta-llama/llama-3.1-405b-instruct': { name: 'Llama 3.1 405B Instruct', description: 'Meta\'s largest and most capable model for deep, complex reasoning and generation.', category: 'deep-thought', tags: ['reasoning', 'powerful', 'meta', 'llama'], contextLength: 128000, isRecommended: true, speed: 2, intelligence: 5 },
+    
     // Image Generation
-    'dall-e-3': { name: 'DALL-E 3', description: 'OpenAI\'s high-quality image generation model, great for complex and detailed scenes.', category: 'image', tags: ['image generation', 'openai', 'high quality'], isRecommended: true },
-    'gpt-image-1': { name: 'GPT Image 1', description: 'A fast and versatile image generation model from OpenAI.', category: 'image', tags: ['image generation', 'fast', 'openai'] },
-    'openrouter:google/gemini-2.5-flash-image-preview': { name: 'Nano Banana', description: "Google's nimble model for quick and creative image editing and manipulation tasks (image-to-image).", category: 'image', tags: ['image editing', 'vision', 'google', 'fast'], isRecommended: true },
+    'dall-e-3': { name: 'DALL-E 3', description: 'OpenAI\'s high-quality image generation model, great for complex and detailed scenes.', category: 'image', tags: ['image generation', 'openai', 'high quality'], speed: 3, intelligence: 5 },
+    'gpt-image-1': { name: 'GPT Image 1', description: 'A fast and versatile image generation model from OpenAI.', category: 'image', tags: ['image generation', 'fast', 'openai'], speed: 4, intelligence: 4 },
+    'openrouter:google/gemini-2.5-flash-image-preview': { name: 'Nano Banana', description: "Google's nimble model for quick and creative image editing and manipulation tasks (image-to-image).", category: 'image', tags: ['image editing', 'vision', 'google', 'fast'], isRecommended: true, speed: 5, intelligence: 4 },
 
     // Multimodal
-    'gpt-4o-mini': { name: "GPT-4o mini", description: "A smaller, faster, and more affordable version of GPT-4o with multimodal capabilities.", category: 'multimodal', tags: ['vision', 'fast', 'openai'] },
-    'gemini-1.5-flash': { name: "Gemini 1.5 Flash", description: "A lightweight, fast and cost-efficient multimodal model from Google.", category: 'multimodal', tags: ['vision', 'fast', 'google'] },
+    'openrouter:openai/gpt-4o-mini': { name: "GPT-4o mini", description: "A smaller, faster, and more affordable version of GPT-4o with multimodal capabilities.", category: 'multimodal', tags: ['vision', 'fast', 'openai'], speed: 5, intelligence: 3 },
+    'openrouter:google/gemini-2.5-flash': { name: "Gemini 2.5 Flash", description: "A lightweight, fast and cost-efficient multimodal model from Google.", category: 'multimodal', tags: ['vision', 'fast', 'google'], speed: 5, intelligence: 3 },
     'Qwen/Qwen2.5-VL-72B-Instruct': { name: 'Qwen 2.5 VL Instruct', description: 'A powerful vision-language model from Alibaba for understanding image content.', category: 'multimodal', tags: ['vision', 'qwen'] },
-    'grok-vision-beta': { name: 'Grok Vision', description: 'The multimodal version of xAI\'s Grok, capable of processing visual information.', category: 'multimodal', tags: ['vision', 'grok'] },
     'meta-llama/Llama-3.2-90b-vision-instruct': { name: 'Llama 3.2 90B Vision', description: 'Meta\'s large-scale vision model for advanced image understanding.', category: 'multimodal', tags: ['vision', 'meta', 'llama'] },
 
-    // Specialized - Audio
-    'openai/whisper-large-v3': { name: 'Whisper Large v3', description: 'State-of-the-art audio transcription model from OpenAI. Converts speech to text.', category: 'specialized', tags: ['audio', 'transcription', 'speech-to-text'] },
-    'cartesia/sonic': { name: 'Cartesia Sonic', description: 'A model for generating realistic human-like audio from text.', category: 'specialized', tags: ['audio', 'tts', 'text-to-speech'] },
-
     // Specialized - Code
-    'codestral-latest': { name: 'Codestral', description: 'Mistral\'s flagship model specialized in code generation, completion, and explanation.', category: 'specialized', tags: ['code', 'programming', 'mistral'], isRecommended: true },
-    'arcee-ai/coder-large': { name: 'Arcee Coder Large', description: 'A large model from Arcee.ai focused on high-quality code generation.', category: 'specialized', tags: ['code', 'programming'] },
+    'openrouter:mistralai/codestral-latest': { name: 'Codestral', description: 'Mistral\'s flagship model specialized in code generation, completion, and explanation.', category: 'specialized', tags: ['code', 'programming', 'mistral'], isRecommended: true, speed: 5, intelligence: 4 },
     'Qwen/Qwen2.5-Coder-32B-Instruct': { name: 'Qwen 2.5 Coder 32B', description: 'A 32B parameter coding model from Alibaba.', category: 'specialized', tags: ['code', 'programming', 'qwen'] },
+    'openrouter:deepseek/deepseek-coder': { name: 'DeepSeek Coder', description: 'A powerful and specialized model for code-related tasks.', category: 'specialized', tags: ['code', 'programming', 'deepseek'], speed: 4, intelligence: 4 },
 
-    // Specialized - Moderation
-    'meta-llama/Llama-Guard-4-12B': { name: 'Llama Guard 4', description: 'Meta\'s model for content moderation and safety classification.', category: 'specialized', tags: ['moderation', 'safety', 'guard', 'meta'] },
-    'mistral-moderation-latest': { name: 'Mistral Moderation', description: 'A specialized model from Mistral for content safety and moderation.', category: 'specialized', tags: ['moderation', 'safety', 'mistral'] },
-
+    // Other notable models
+    'meta-llama/Llama-3.2-1B-Instruct': { name: 'Llama 3.2 1B Instruct', description: 'Meta\'s smallest and fastest model, perfect for routing, classification, or simple agentic tasks.', category: 'text', tags: ['fast', 'small', 'meta', 'llama'], speed: 5, intelligence: 2 },
+    'openrouter:google/gemma-2-9b-it:free': { name: 'Gemma 2 9B (Free)', description: 'A free, high-performance open model from Google, suitable for a variety of tasks.', category: 'text', tags: ['free', 'balanced', 'google'], speed: 4, intelligence: 3 },
+    
     // Legacy Models
-    'gpt-4-turbo-preview': { name: 'GPT-4 Turbo', description: "Legacy. The preview version of OpenAI's GPT-4 Turbo model, offering a large context window and strong performance.", isLegacy: true, contextLength: 128000, category: 'text', tags: ['legacy', 'powerful', 'openai'] },
-    'gpt-3.5-turbo': { name: 'GPT-3.5 Turbo', description: 'Legacy. A fast and affordable model from OpenAI, suitable for a wide range of general tasks.', isLegacy: true, contextLength: 16000, category: 'text', tags: ['legacy', 'fast', 'openai'] },
-    'openrouter:anthropic/claude-3-opus': { name: 'Claude 3 Opus', description: "Legacy. Anthropic's powerful model for complex tasks, preceding the 4.1 release.", isLegacy: true, contextLength: 200000, category: 'multimodal', tags: ['legacy', 'vision', 'writing', 'analysis', 'anthropic'] },
-    'openrouter:anthropic/claude-3-sonnet': { name: 'Claude 3 Sonnet', description: 'Legacy. A balanced model from Anthropic, a precursor to the 3.5 version.', isLegacy: true, contextLength: 200000, category: 'multimodal', tags: ['legacy', 'vision', 'balanced', 'anthropic'] },
-    'openrouter:anthropic/claude-3-haiku': { name: 'Claude 3 Haiku', description: 'Legacy. The fastest and most compact model in the Claude 3 family, designed for near-instant responsiveness.', isLegacy: true, contextLength: 200000, category: 'text', tags: ['legacy', 'fast', 'anthropic'] },
-    'meta-llama/Llama-3-70b-instruct': { name: 'Llama 3 70B Instruct', description: 'Legacy. The 70-billion parameter instruction-tuned model from Meta.', isLegacy: true, contextLength: 8000, category: 'text', tags: ['legacy', 'powerful', 'meta', 'llama'] },
-    'openrouter:mistralai/mixtral-8x22b-instruct': { name: 'Mixtral 8x22B Instruct', description: 'Legacy. A powerful Mixture-of-Experts (MoE) model from Mistral AI.', isLegacy: true, contextLength: 64000, category: 'text', tags: ['legacy', 'moe', 'mistral', 'powerful'] },
+    'openrouter:openai/gpt-4-turbo': { name: 'GPT-4 Turbo', description: "Legacy. The previous version of OpenAI's GPT-4 Turbo model, offering a large context window and strong performance.", isLegacy: true, contextLength: 128000, category: 'text', tags: ['legacy', 'powerful', 'openai'] },
+    'openrouter:openai/gpt-3.5-turbo': { name: 'GPT-3.5 Turbo', description: 'Legacy. A fast and affordable model from OpenAI, suitable for a wide range of general tasks.', isLegacy: true, contextLength: 16000, category: 'text', tags: ['legacy', 'fast', 'openai'] },
+    'openrouter:anthropic/claude-3-opus': { name: 'Claude 3 Opus (Legacy)', description: "Legacy. Anthropic's powerful model for complex tasks, preceding the 3.5 Sonnet release.", isLegacy: true, contextLength: 200000, category: 'multimodal', tags: ['legacy', 'vision', 'writing', 'analysis', 'anthropic'] },
 };
 
 function titleCase(str: string): string {
@@ -159,7 +190,6 @@ function parseModelId(id: string): ModelInfo {
       else if (name.startsWith('grok-')) provider = 'xAI';
       else if (name.startsWith('gemini-')) provider = 'Google';
       else if (name.startsWith('deepseek-')) provider = 'DeepSeek';
-      else if (name.startsWith('o1') || name.startsWith('o3') || name.startsWith('o4')) provider = 'OpenAI';
       else if (name.startsWith('command-')) provider = 'Cohere';
       else if (name.startsWith('meta-llama') || name.startsWith('Llama-')) provider = 'Meta';
       else if (name.startsWith('Qwen')) provider = 'Qwen';
@@ -177,6 +207,12 @@ function parseModelId(id: string): ModelInfo {
   else if (lowerProvider.includes('meta')) providerIcon = 'MetaIcon';
   else if (lowerProvider.includes('mistral')) providerIcon = 'MistralIcon';
   else if (lowerProvider.includes('xai') || lowerProvider.includes('grok')) providerIcon = 'GrokIcon';
+  else if (lowerProvider.includes('qwen')) providerIcon = 'QwenIcon';
+  else if (lowerProvider.includes('deepseek')) providerIcon = 'DeepseekIcon';
+  else if (lowerProvider.includes('cohere')) providerIcon = 'CohereIcon';
+  else if (lowerProvider.includes('microsoft')) providerIcon = 'MicrosoftIcon';
+  else if (lowerProvider.includes('nvidia')) providerIcon = 'NvidiaIcon';
+  else if (lowerProvider.includes('baidu')) providerIcon = 'BaiduIcon';
   else providerIcon = 'CommentsIcon';
 
 
@@ -191,6 +227,8 @@ function parseModelId(id: string): ModelInfo {
       category: 'text' as ModelCategory,
       tags: [] as string[],
       isLegacy: false,
+      speed: Math.floor(Math.random() * 3) + 2,
+      intelligence: Math.floor(Math.random() * 3) + 2,
   };
   
   const finalInfo = { ...baseInfo, ...metadata };
@@ -239,6 +277,8 @@ export interface Conversation {
   temperature?: number;
   maxTokens?: number;
   selectedTools?: string[];
+  pinnedMessageId?: string | null;
+  supertextsEnabled?: boolean;
 }
 
 export interface AppSettings {
@@ -247,3 +287,5 @@ export interface AppSettings {
     defaultTemperature: number;
     defaultMaxTokens: number;
 }
+
+export type Memory = Record<string, string>;

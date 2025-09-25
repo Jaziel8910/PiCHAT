@@ -1,5 +1,6 @@
+
 import { useCallback } from 'react';
-import type { Message, PuterModel, GenerateImageOptions } from '../types';
+import type { Message, PuterModel, GenerateImageOptions, Memory } from '../types';
 
 declare const puter: any;
 
@@ -17,10 +18,11 @@ interface StreamChatResponseParams {
 
 interface GetChatResponseParams {
   model: PuterModel;
-  messages: Omit<Message, 'id' | 'imageUrl' | 'isGenerating' | 'isStreaming'>[];
+  messages: any[]; // Can include tool messages
   systemPrompt?: string;
   temperature?: number;
   max_tokens?: number;
+  tools?: any[];
 }
 
 
@@ -90,22 +92,22 @@ export const usePuter = () => {
     []
   );
 
-   const getChatResponse = useCallback(async ({ model, messages, systemPrompt, temperature, max_tokens }: GetChatResponseParams): Promise<string | null> => {
+   const getChatResponse = useCallback(async ({ model, messages, systemPrompt, temperature, max_tokens, tools }: GetChatResponseParams): Promise<any | null> => {
       if (typeof puter === 'undefined' || !puter.ai) {
         throw new Error('Puter SDK is not available.');
       }
       
-      const chatMessages = messages.map(message => ({ role: message.role, content: message.content }));
       const apiMessages = systemPrompt 
-          ? [{ role: 'system', content: systemPrompt }, ...chatMessages] 
-          : chatMessages;
+          ? [{ role: 'system', content: systemPrompt }, ...messages] 
+          : messages;
       
       const options: any = { model, stream: false };
       if (temperature !== undefined) options.temperature = temperature;
       if (max_tokens !== undefined) options.max_tokens = max_tokens;
+      if (tools) options.tools = tools;
 
       const response = await puter.ai.chat(apiMessages, options);
-      return response?.text || null;
+      return response || null;
    }, []);
   
   const generateImage = useCallback(async (options: GenerateImageOptions): Promise<string> => {
@@ -171,6 +173,34 @@ export const usePuter = () => {
     }
   }, []);
 
+  const MEMORY_KEY = 'pichat-memory-store';
 
-  return { streamChatResponse, getChatResponse, generateImage, img2txt, txt2speech, zipAndDownload };
+  const getMemory = useCallback(async (): Promise<Memory> => {
+      if (typeof puter === 'undefined' || !puter.kv) {
+          console.warn('Puter.kv not available, cannot load memory.');
+          return {};
+      }
+      try {
+          const memory = await puter.kv.get(MEMORY_KEY);
+          return memory ? JSON.parse(memory) : {};
+      } catch (e) {
+          console.error("Failed to get memory from kv store:", e);
+          return {};
+      }
+  }, []);
+
+  const setMemory = useCallback(async (memory: Memory): Promise<void> => {
+      if (typeof puter === 'undefined' || !puter.kv) {
+          console.warn('Puter.kv not available, cannot save memory.');
+          return;
+      }
+      try {
+          await puter.kv.set(MEMORY_KEY, JSON.stringify(memory));
+      } catch (e) {
+          console.error("Failed to set memory in kv store:", e);
+      }
+  }, []);
+
+
+  return { streamChatResponse, getChatResponse, generateImage, img2txt, txt2speech, zipAndDownload, getMemory, setMemory };
 };

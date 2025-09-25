@@ -1,3 +1,12 @@
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1"
+  }
+}
+</script>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -14,12 +23,12 @@
           extend: {
             colors: {
               'puter-blue': '#3b82f6',
-              'theme-bg': '#f3f4f6',
-              'theme-text': '#1f2937',
-              'theme-text-secondary': '#4b5563',
-              'theme-border': 'rgba(255, 255, 255, 0.5)',
-              'theme-surface': 'rgba(255, 255, 255, 0.6)',
-              'theme-surface-hover': 'rgba(255, 255, 255, 0.8)',
+              'theme-bg': 'var(--theme-bg)',
+              'theme-text': 'var(--theme-text)',
+              'theme-text-secondary': 'var(--theme-text-secondary)',
+              'theme-border': 'var(--theme-border)',
+              'theme-surface': 'var(--theme-surface)',
+              'theme-surface-hover': 'var(--theme-surface-hover)',
             },
             borderRadius: {
               '4xl': '2rem',
@@ -28,6 +37,11 @@
                 gradient: 'gradient 2s ease infinite',
                 'blur-in': 'blur-in 0.4s ease-out forwards',
                 'word-fade-in': 'word-fade-in 0.3s ease-out forwards',
+                'message-fade-in': 'message-fade-in 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+                'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+                'pulse': 'pulse 2s infinite',
+                'bounce': 'bounce 1s infinite',
+                'spin': 'spin 2s linear infinite',
             },
             keyframes: {
                 gradient: {
@@ -41,13 +55,47 @@
                 'word-fade-in': {
                   'from': { opacity: '0', transform: 'translateY(3px)' },
                   'to': { opacity: '1', transform: 'translateY(0)' },
-                }
+                },
+                'message-fade-in': {
+                    'from': { opacity: '0', transform: 'translateY(20px) scale(0.98)' },
+                    'to': { opacity: '1', transform: 'translateY(0) scale(1)' },
+                },
+                shake: {
+                  '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                  '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                  '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                  '40%, 60%': { transform: 'translate3d(4px, 0, 0)' },
+                },
+                pulse: {
+                    '0%, 100%': { opacity: 1 },
+                    '50%': { opacity: .5 },
+                },
+                 bounce: {
+                    '0%, 100%': { transform: 'translateY(-25%)', animationTimingFunction: 'cubic-bezier(0.8,0,1,1)' },
+                    '50%': { transform: 'none', animationTimingFunction: 'cubic-bezier(0,0,0.2,1)' },
+                },
             }
           }
         }
       }
     </script>
     <style>
+      :root {
+        --theme-bg: #f3f4f6;
+        --theme-text: #1f2937;
+        --theme-text-secondary: #4b5563;
+        --theme-border: rgba(0, 0, 0, 0.08);
+        --theme-surface: rgba(255, 255, 255, 0.7);
+        --theme-surface-hover: rgba(255, 255, 255, 0.9);
+      }
+      .dark {
+        --theme-bg: #111827;
+        --theme-text: #f9fafb;
+        --theme-text-secondary: #9ca3af;
+        --theme-border: rgba(255, 255, 255, 0.1);
+        --theme-surface: rgba(30, 41, 59, 0.75); /* slate-800 with transparency */
+        --theme-surface-hover: rgba(51, 65, 85, 0.9); /* slate-700 with transparency */
+      }
       body::before, body::after {
         content: '';
         position: fixed;
@@ -83,12 +131,9 @@
         animation: word-fade-in 0.3s forwards;
       }
       .message-appear {
-        animation: message-fade-in 0.5s ease-out forwards;
+        animation: message-fade-in 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
       }
-      @keyframes message-fade-in {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
+      
       .voice-chat-bg {
         background: linear-gradient(180deg, #ffffff 80%, #e0f7ff 100%);
         background-size: 100% 200%;
@@ -108,18 +153,84 @@
           50%{background-position:100% 50%}
           100%{background-position:0% 50%}
       }
+      .supertext { display: inline-block; }
+      /* Basic Supertexts */
+      .st-rainbow { background-image: linear-gradient(to right, violet, indigo, blue, green, yellow, orange, red); -webkit-background-clip: text; color: transparent; animation: rainbow-anim 4s linear infinite; background-size: 200% 100%; }
+      @keyframes rainbow-anim { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+      .st-fire { color: #ffc837; text-shadow: 0 0 5px #ffc837, 0 0 10px #ff8008, 0 0 20px #ff8008, 0 0 30px #db3a00, 0 0 40px #db3a00; animation: fire-flicker 1.5s infinite alternate; }
+      @keyframes fire-flicker { 0% { text-shadow: 0 0 5px #ffc837, 0 0 10px #ff8008, 0 0 20px #ff8008; } 100% { text-shadow: 0 0 6px #ffc837, 0 0 12px #ff8008, 0 0 24px #ff8008; } }
+      .st-highlight { background-color: rgba(250, 255, 0, 0.4); padding: 0.1em 0.3em; border-radius: 4px; }
+      .dark .st-highlight { background-color: rgba(250, 255, 0, 0.2); }
+      .st-enlarge { font-size: 1.25em; font-weight: 600; vertical-align: -0.1em; }
+      .st-spoiler { background-color: var(--theme-text-secondary); color: var(--theme-text-secondary); padding: 0.1em 0.3em; border-radius: 4px; transition: all 0.15s ease-in-out; cursor: pointer; user-select: none; }
+      .st-spoiler:hover, .st-spoiler:focus { background-color: transparent; color: var(--theme-text); outline: none; }
+      .st-neon { color: #fff; text-shadow: 0 0 7px #fff, 0 0 10px #fff, 0 0 21px #fff, 0 0 42px #0fa, 0 0 82px #0fa; }
+      .st-alert { color: #ef4444; font-weight: 700; }
+      
+      /* New Supertexts */
+      .st-glitch { animation: glitch-anim 1s infinite steps(2, end); text-shadow: 0.05em 0 0 #00fffc, -0.05em 0 0 #ff00ff; }
+      @keyframes glitch-anim { 0% { transform: translate(0); clip-path: inset(0); } 20% { transform: translate(-0.05em, 0.05em); clip-path: inset(20% 0 50% 0); } 40% { transform: translate(-0.05em, -0.05em); clip-path: inset(50% 0 10% 0); } 60% { transform: translate(0.05em, 0.05em); clip-path: inset(10% 0 80% 0); } 80% { transform: translate(0.05em, -0.05em); clip-path: inset(80% 0 5% 0); } 100% { transform: translate(0); clip-path: inset(0); } }
+      .st-matrix { color: #3f3; font-family: monospace; text-shadow: 0 0 3px #3f3; }
+      .st-gold { font-weight: bold; background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); -webkit-background-clip: text; color: transparent; }
+      .st-ice { color: #a6d5f7; text-shadow: 0 0 5px #d0e8f2, 1px 1px 1px #fff; }
+      .st-water { animation: water-wave 2s ease-in-out infinite alternate; }
+      @keyframes water-wave { 0% { transform: translateY(0) skewX(0deg); } 100% { transform: translateY(-3px) skewX(2deg); } }
+      .st-typewriter { overflow: hidden; white-space: nowrap; border-right: .15em solid orange; animation: typing 1.5s steps(30, end), blink-caret .75s step-end infinite; }
+      @keyframes typing { from { width: 0 } to { width: 100% } }
+      @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: orange; } }
+      .st-redacted { background-color: var(--theme-text); color: var(--theme-text); user-select: none; }
+      .st-whisper { font-size: 0.8em; color: var(--theme-text-secondary); font-style: italic; }
+      .st-shout { font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+      .st-thought { border: 2px dashed var(--theme-text-secondary); border-radius: 12px; padding: 0.1em 0.4em; }
+      .st-comic { font-family: "Comic Sans MS", cursive, sans-serif; font-weight: bold; }
+      .st-blueprint { color: #fff; background-color: #3b82f6; padding: 0.2em 0.4em; border-radius: 4px; font-family: monospace; }
+      .st-chalkboard { color: #fdfdfd; text-shadow: 1px 1px 1px #aaa; font-family: "Permanent Marker", cursive; }
+      .st-steam { opacity: 0.7; filter: blur(1px); animation: steam-rise 3s infinite linear; }
+      @keyframes steam-rise { 0% { transform: translateY(0); opacity: 0.7; } 100% { transform: translateY(-10px); opacity: 0; } }
+      .st-smokey { color: transparent; text-shadow: 0 0 10px var(--theme-text); }
+      .st-pixelated { font-family: 'Courier New', Courier, monospace; image-rendering: pixelated; font-smooth: never; -webkit-font-smoothing: none; }
+      .st-inverted { background-color: var(--theme-text); color: var(--theme-bg); padding: 0.1em 0.3em; }
+      .st-wavy { animation: wavy-text 1.5s ease-in-out infinite; }
+      @keyframes wavy-text { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+      .st-bouncy { animation: bounce 1s; }
+      .st-pulse { animation: pulse 1.5s infinite; }
+      .st-shake { animation: shake 0.5s; }
+      .st-spin { animation: spin 2s linear infinite; }
+      .st-fade-in { animation: word-fade-in 1s; }
+      .st-slide-in { animation: slide-in-anim 0.5s forwards; opacity: 0; }
+      @keyframes slide-in-anim { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+      .st-emboss { text-shadow: -1px -1px 1px rgba(255,255,255,.5), 1px 1px 1px rgba(0,0,0,.3); }
+      .st-deboss { text-shadow: 1px 1px 1px rgba(255,255,255,.5), -1px -1px 1px rgba(0,0,0,.3); }
+      .st-outline { -webkit-text-stroke: 1px var(--theme-text); color: transparent; }
+      .st-shadow { text-shadow: 3px 3px 5px rgba(0,0,0,0.3); }
+      .st-dreamy { color: #9333ea; text-shadow: 0 0 10px #a855f7; }
+      .st-static { animation: static-anim 0.1s infinite; }
+      @keyframes static-anim { 0% { transform: skewX(0deg) } 50% { transform: skewX(2deg) } 100% { transform: skewX(-2deg) } }
+      .st-binary { font-family: monospace; }
+      .st-morse { font-family: monospace; }
+      .st-encrypted { font-family: "Wingdings", "Zapf Dingbats", monospace; }
+      .st-handwritten { font-family: "Brush Script MT", cursive; }
+      .st-stamp { border: 2px solid #ef4444; color: #ef4444; padding: 0.2em 0.5em; border-radius: 4px; text-transform: uppercase; font-weight: bold; transform: rotate(-10deg); }
+      .st-approved { border: 2px solid #22c55e; color: #22c55e; padding: 0.2em 0.5em; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
+      .st-denied { border: 2px solid #ef4444; color: #ef4444; padding: 0.2em 0.5em; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
+      .st-confidential { background-color: #fef08a; padding: 0.1em 0.3em; font-family: monospace; color: #000; }
+      .st-top-secret { background-color: #ef4444; color: #fff; padding: 0.1em 0.3em; font-family: monospace; text-transform: uppercase; }
+      .st-burn-in { animation: burn-in-anim 2s forwards; opacity: 0; }
+      @keyframes burn-in-anim { 0% { text-shadow: 0 0 30px #fff; opacity: 0; } 100% { text-shadow: none; opacity: 1; } }
+      .st-glimmer { animation: glimmer-anim 2.5s infinite; }
+      @keyframes glimmer-anim { 0%, 100% { text-shadow: 0 0 2px #fff; } 50% { text-shadow: 0 0 10px #fff; } }
+      .st-sparkle { animation: sparkle-anim 1.5s infinite; }
+      @keyframes sparkle-anim { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+      .st-starry { background: url('https://www.transparenttextures.com/patterns/stardust.png'); -webkit-background-clip: text; color: transparent; }
+      .st-cosmic { background-image: linear-gradient(45deg, #000020, #000040, #300050, #500050); -webkit-background-clip: text; color: transparent; text-shadow: 0 0 5px #fff; }
+      .st-graffiti { font-family: Impact, Charcoal, sans-serif; color: #fde047; -webkit-text-stroke: 1px #000; }
+      .st-old-movie { filter: sepia(100%) contrast(150%); }
+      .st-newspaper { font-family: "Times New Roman", Times, serif; background: #f5f5f5; color: #333; padding: 2px; }
+      .dark .st-newspaper { background: #333; color: #f5f5f5; }
+
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.1.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
-    "react/": "https://aistudiocdn.com/react@^19.1.1/"
-  }
-}
-</script>
-</head>
-  <body class="bg-theme-bg text-theme-text antialiased overflow-hidden font-sans">
+  </head>
+  <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

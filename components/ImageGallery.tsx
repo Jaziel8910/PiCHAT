@@ -23,7 +23,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ conversation, onClos
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="bg-theme-surface/80 backdrop-blur-2xl border border-theme-border rounded-4xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+      <div className="bg-theme-surface backdrop-blur-2xl border border-theme-border rounded-4xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
         <header className="flex items-center justify-between p-4 border-b border-black/10 flex-shrink-0">
           <h3 className="text-xl font-semibold text-theme-text">Image Gallery</h3>
           <button onClick={onClose} className="p-1 text-theme-text-secondary rounded-full hover:bg-black/5 hover:text-theme-text" aria-label="Close gallery">

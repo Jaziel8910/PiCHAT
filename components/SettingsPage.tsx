@@ -150,7 +150,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="bg-theme-surface/90 backdrop-blur-2xl border border-theme-border rounded-4xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+      <div className="bg-theme-surface backdrop-blur-2xl border border-theme-border rounded-4xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
         <header className="flex items-center justify-between p-4 border-b border-black/10 flex-shrink-0">
           <h2 className="text-xl font-bold text-theme-text">Settings</h2>
           <button onClick={onClose} className="p-1 text-theme-text-secondary rounded-full hover:bg-black/5 hover:text-theme-text" aria-label="Close">

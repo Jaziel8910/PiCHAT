@@ -41,9 +41,19 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ language, code }) => {
   );
 };
 
-const MarkdownParser: React.FC<{ text: string }> = ({ text }) => {
-    const segments = text.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`)/g).filter(Boolean);
+const MarkdownParser: React.FC<{ text: string, supertextsEnabled?: boolean }> = ({ text, supertextsEnabled = false }) => {
+    const segments = text.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`|\[st:[a-zA-Z-]+].*?\[\/st])/gs).filter(Boolean);
     return (<>{segments.map((segment, i) => {
+        if (supertextsEnabled) {
+            const stMatch = segment.match(/^\[st:([a-zA-Z-]+)](.*?)\[\/st]$/s);
+            if (stMatch) {
+                const effect = stMatch[1];
+                const content = stMatch[2];
+                return <span key={i} className={`supertext st-${effect}`} {...(effect === 'spoiler' && { tabIndex: 0 })}>
+                    <MarkdownParser text={content} supertextsEnabled={supertextsEnabled} />
+                </span>;
+            }
+        }
         if (segment.startsWith('**') && segment.endsWith('**')) return <strong key={i}>{segment.slice(2, -2)}</strong>;
         if (segment.startsWith('*') && segment.endsWith('*')) return <em key={i}>{segment.slice(1, -1)}</em>;
         if (segment.startsWith('`') && segment.endsWith('`')) return <code key={i} className="bg-black/10 px-1.5 py-0.5 rounded text-sm font-mono">{segment.slice(1, -1)}</code>;
@@ -51,7 +61,7 @@ const MarkdownParser: React.FC<{ text: string }> = ({ text }) => {
     })}</>);
 };
 
-const StreamingRenderer: React.FC<{ text: string }> = ({ text }) => {
+const StreamingRenderer: React.FC<{ text: string, supertextsEnabled?: boolean }> = ({ text, supertextsEnabled = false }) => {
     const [stableText, setStableText] = useState('');
     const [newChunk, setNewChunk] = useState('');
     const prevTextRef = useRef('');
@@ -76,14 +86,14 @@ const StreamingRenderer: React.FC<{ text: string }> = ({ text }) => {
 
     return (
         <>
-            <MarkdownParser text={stableText} />
+            <MarkdownParser text={stableText} supertextsEnabled={supertextsEnabled} />
             {animatedWords.map((word, index) => (
                 <span
                     key={index}
                     className="streaming-text-chunk"
                     style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                    <MarkdownParser text={word} />
+                    <MarkdownParser text={word} supertextsEnabled={supertextsEnabled} />
                 </span>
             ))}
         </>
@@ -93,10 +103,11 @@ const StreamingRenderer: React.FC<{ text: string }> = ({ text }) => {
 interface MarkdownRendererProps {
   content: string;
   isStreaming?: boolean;
+  supertextsEnabled?: boolean;
 }
 
-export const MarkdownRenderer: React.FC<MarkdownRendererProps> = React.memo(({ content, isStreaming = false }) => {
-  const parts = useMemo(() => content.split(/(```[\w-]*\n[\s\S]*?\n```)/g), [content]);
+export const MarkdownRenderer: React.FC<MarkdownRendererProps> = React.memo(({ content, isStreaming = false, supertextsEnabled = false }) => {
+  const parts = useMemo(() => (content || '').split(/(```[\w-]*\n[\s\S]*?\n```)/g), [content]);
 
   return (
     <>
@@ -110,9 +121,9 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = React.memo(({ c
         } else {
           const isLastPart = index === parts.length - 1;
           if (isStreaming && isLastPart) {
-            return <StreamingRenderer key={index} text={part} />
+            return <StreamingRenderer key={index} text={part} supertextsEnabled={supertextsEnabled} />
           }
-          return <MarkdownParser key={index} text={part} />;
+          return <MarkdownParser key={index} text={part} supertextsEnabled={supertextsEnabled} />;
         }
       })}
     </>
